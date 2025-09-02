@@ -12,7 +12,8 @@ class RumahSakitController extends Controller
      */
     public function index()
     {
-        //
+        $rumahSakits = RumahSakit::latest()->paginate(10);
+        return view('rumah_sakit.index', compact('rumahSakits'));
     }
 
     /**
@@ -20,7 +21,7 @@ class RumahSakitController extends Controller
      */
     public function create()
     {
-        //
+        return view('rumah_sakit.create');
     }
 
     /**
@@ -28,15 +29,16 @@ class RumahSakitController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'nama_rs' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'email' => 'required|email|unique:rumah_sakits,email',
+            'telepon' => 'required|string|max:15',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(RumahSakit $rumahSakit)
-    {
-        //
+        RumahSakit::create($request->all());
+
+        return redirect()->route('rumah_sakit.index')->with('success', 'Data Rumah Sakit berhasil ditambahkan.');
     }
 
     /**
@@ -44,7 +46,7 @@ class RumahSakitController extends Controller
      */
     public function edit(RumahSakit $rumahSakit)
     {
-        //
+        return view('rumah_sakit.edit', compact('rumahSakit'));
     }
 
     /**
@@ -52,7 +54,16 @@ class RumahSakitController extends Controller
      */
     public function update(Request $request, RumahSakit $rumahSakit)
     {
-        //
+        $request->validate([
+            'nama_rs' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'email' => 'required|email|unique:rumah_sakits,email,' . $rumahSakit->id,
+            'telepon' => 'required|string|max:15',
+        ]);
+
+        $rumahSakit->update($request->all());
+
+        return redirect()->route('rumah_sakit.index')->with('success', 'Data Rumah Sakit berhasil diperbarui.');
     }
 
     /**
@@ -60,6 +71,13 @@ class RumahSakitController extends Controller
      */
     public function destroy(RumahSakit $rumahSakit)
     {
-        //
+        // Pastikan tidak ada pasien yang terkait sebelum menghapus
+        if ($rumahSakit->pasiens()->count() > 0) {
+            return response()->json(['error' => 'Hapus dulu data pasien di rumah sakit ini!'], 422);
+        }
+
+        $rumahSakit->delete();
+        
+        return response()->json(['success' => 'Data Rumah Sakit berhasil dihapus.']);
     }
 }

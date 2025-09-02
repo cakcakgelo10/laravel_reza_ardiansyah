@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pasien extends Model
 {
-    use HasFactory;
+             protected $fillable = [
+          'nama_pasien',
+          'alamat',
+          'telepon',
+          'rumah_sakit_id',
+      ];
 
-    public function rumahSakit()
-{
-    return $this->belongsTo(RumahSakit::class);
+      public function rumahSakit()
+      {
+          return $this->belongsTo(RumahSakit::class);
+      }
+      
 }
-}
-

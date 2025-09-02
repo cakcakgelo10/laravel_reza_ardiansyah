@@ -1,31 +1,37 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RumahSakitController;
+use App\Http\Controllers\PasienController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
+// Halaman Awal, arahkan ke halaman login
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Grup route yang hanya bisa diakses setelah login
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // Arahkan dashboard ke daftar rumah sakit
+    Route::get('/dashboard', function () {
+        return redirect()->route('rumah_sakit.index');
+    })->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+    // Route untuk Profile (bawaan Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Route untuk CRUD Rumah Sakit (menggunakan resource controller)
+    Route::resource('rumah_sakit', RumahSakitController::class);
+
+    // Route untuk CRUD Pasien
+    Route::resource('pasien', PasienController::class);
+
+    // Route khusus untuk filter pasien via AJAX
+    Route::get('/filter-pasiens', [PasienController::class, 'filter'])->name('pasien.filter');
 });
+
 
 require __DIR__.'/auth.php';

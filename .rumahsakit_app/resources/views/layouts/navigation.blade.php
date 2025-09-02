@@ -11,12 +11,14 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('rumah_sakit.index')" :active="request()->routeIs('rumah_sakit.*')">
+                        {{ __('Rumah Sakit') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('pasien.index')" :active="request()->routeIs('pasien.*')">
+                        {{ __('Pasien') }}
                     </x-nav-link>
                 </div>
-            </div>
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">

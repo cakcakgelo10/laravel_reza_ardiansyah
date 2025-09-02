@@ -9,9 +9,16 @@ class RumahSakit extends Model
 {
     use HasFactory;
 
-    public function pasiens()
-{
-    return $this->hasMany(Pasien::class);
-}
-}
+        protected $fillable = [
+          'nama_rs',
+          'alamat',
+          'email',
+          'telepon',
+      ];
 
+      public function pasiens()
+      {
+          return $this->hasMany(Pasien::class);
+      }
+      
+}
