@@ -1,16 +1,48 @@
-@forelse ($pasiens as $pasien)
-        <tr id="pasien-row-{{ $pasien->id }}">
-            <td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">{{ $pasien->nama_pasien }}</td>
-            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ $pasien->alamat }}</td>
-            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ $pasien->telepon }}</td>
-            <td class="whitespace-nowrap px-4 py-2 text-gray-700">{{ $pasien->rumahSakit->nama_rs }}</td>
-            <td class="whitespace-nowrap px-4 py-2">
-                <a href="{{ route('pasien.edit', $pasien->id) }}" class="inline-block rounded bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700">Edit</a>
-                <button data-url="{{ route('pasien.destroy', $pasien->id) }}" class="delete-btn inline-block rounded bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700">Hapus</button>
-            </td>
-        </tr>
-    @empty
+<table class="w-full text-sm text-left text-gray-500">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
         <tr>
-            <td colspan="5" class="text-center text-gray-500 py-4">Tidak ada data.</td>
+            <th scope="col" class="px-6 py-3">Nama Pasien</th>
+            <th scope="col" class="px-6 py-3">Alamat</th>
+            <th scope="col" class="px-6 py-3">Telepon</th>
+            <th scope="col" class="px-6 py-3">Rumah Sakit</th>
+            <th scope="col" class="px-6 py-3">Aksi</th>
         </tr>
-    @endforelse
+    </thead>
+    <tbody>
+        @forelse ($pasiens as $pasien)
+            {{-- Tambahkan ID unik untuk setiap baris --}}
+            <tr id="pasien-row-{{ $pasien->id }}" class="bg-white border-b hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    {{ $pasien->nama_pasien }}
+                </td>
+                <td class="px-6 py-4">{{ $pasien->alamat }}</td>
+                <td class="px-6 py-4">{{ $pasien->telepon }}</td>
+                <td class="px-6 py-4">{{ $pasien->rumahSakit->nama_rs ?? 'N/A' }}</td>
+                <td class="px-6 py-4">
+                    <div class="flex space-x-2">
+                        <a href="{{ route('pasien.edit', $pasien->id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-xs">
+                            Edit
+                        </a>
+                        {{-- Gunakan data-id agar lebih mudah diakses oleh JavaScript --}}
+                        <button data-id="{{ $pasien->id }}" class="delete-btn bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-xs">
+                            Hapus
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                    Tidak ada data pasien yang ditemukan.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+{{-- Render pagination links jika ada --}}
+<div class="mt-4" id="pagination-links">
+    @if($pasiens instanceof \Illuminate\Pagination\LengthAwarePaginator && $pasiens->hasPages())
+        {{ $pasiens->links() }}
+    @endif
+</div>
