@@ -8,28 +8,21 @@ use Illuminate\Http\Request;
 
 class PasienController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
+        // Ambil data pasien dengan paginasi dan eager loading
         $pasiens = Pasien::with('rumahSakit')->latest()->paginate(10);
         $rumahSakits = RumahSakit::orderBy('nama_rs')->get();
+        
         return view('pasien.index', compact('pasiens', 'rumahSakits'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $rumahSakits = RumahSakit::orderBy('nama_rs')->get();
         return view('pasien.create', compact('rumahSakits'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -43,19 +36,13 @@ class PasienController extends Controller
 
         return redirect()->route('pasien.index')->with('success', 'Data Pasien berhasil ditambahkan.');
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
     public function edit(Pasien $pasien)
     {
         $rumahSakits = RumahSakit::orderBy('nama_rs')->get();
         return view('pasien.edit', compact('pasien', 'rumahSakits'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Pasien $pasien)
     {
         $request->validate([
@@ -70,17 +57,14 @@ class PasienController extends Controller
         return redirect()->route('pasien.index')->with('success', 'Data Pasien berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Pasien $pasien)
     {
         $pasien->delete();
         return response()->json(['success' => 'Data Pasien berhasil dihapus.']);
     }
-
+    
     /**
-     * Filter pasiens based on rumah sakit for AJAX request.
+     * Filter dan paginasi pasien via AJAX.
      */
     public function filter(Request $request)
     {
@@ -91,8 +75,16 @@ class PasienController extends Controller
             $query->where('rumah_sakit_id', $rumahSakitId);
         }
 
-        $pasiens = $query->get();
+        // Selalu gunakan paginate() agar link paginasi tetap ada
+        $pasiens = $query->paginate(10)->appends($request->query());
 
-        return view('pasien._table', compact('pasiens'));
+        // Jika ini adalah request AJAX, kembalikan hanya partial table
+        if ($request->ajax()) {
+            return view('pasien._table', compact('pasiens'));
+        }
+
+        // Jika bukan AJAX (misal, refresh halaman dengan filter), tampilkan halaman penuh
+        $rumahSakits = RumahSakit::orderBy('nama_rs')->get();
+        return view('pasien.index', compact('pasiens', 'rumahSakits'));
     }
 }
