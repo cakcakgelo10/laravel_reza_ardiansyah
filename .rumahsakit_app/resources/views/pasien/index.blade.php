@@ -43,20 +43,15 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const filterSelect = document.getElementById('filter_rs');
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         const tableContainer = document.getElementById('pasien-table-container');
 
-        // Fungsi untuk mengambil data via Fetch API
+        // --- FUNGSI UNTUK MENGAMBIL DATA (FILTER & PAGINASI) ---
         const fetchData = (url) => {
-            // Tampilkan indikator loading (opsional)
             tableContainer.innerHTML = '<p class="text-center py-4">Memuat data...</p>';
-
             fetch(url, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest', // Penting untuk deteksi request->ajax() di Laravel
-                }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
             .then(html => {
@@ -69,27 +64,28 @@
         };
 
         // --- EVENT LISTENER UNTUK FILTER DROPDOWN ---
+        const filterSelect = document.getElementById('filter_rs');
         filterSelect.addEventListener('change', function () {
             const rumahSakitId = this.value;
             const url = `{{ route('pasien.filter') }}?rumah_sakit_id=${rumahSakitId}`;
             fetchData(url);
         });
 
-        // --- EVENT LISTENER UNTUK KLIK PAGINASI (BARU) ---
-        // Menggunakan event delegation pada container
+        // --- SATU EVENT LISTENER UNTUK SEMUA AKSI DI DALAM TABEL (HAPUS & PAGINASI) ---
         tableContainer.addEventListener('click', function(event) {
-            // Cek apakah yang diklik adalah link paginasi
-            if (event.target.tagName === 'A' && event.target.closest('.pagination')) {
-                event.preventDefault(); // Mencegah reload halaman
-                const url = event.target.getAttribute('href');
-                fetchData(url);
-            }
-        });
+            const target = event.target;
 
-        // --- FUNGSI UNTUK HAPUS DATA ---
-        tableContainer.addEventListener('click', function(event) {
-            if (event.target.classList.contains('delete-btn')) {
-                const pasienId = event.target.getAttribute('data-id');
+            // 1. Cek apakah yang diklik adalah LINK PAGINASI
+            if (target.tagName === 'A' && target.closest('.pagination')) {
+                event.preventDefault(); // Mencegah reload halaman
+                const url = target.getAttribute('href');
+                if (url) {
+                    fetchData(url);
+                }
+            } 
+            // 2. Jika bukan, cek apakah yang diklik adalah TOMBOL HAPUS
+            else if (target.classList.contains('delete-btn')) {
+                const pasienId = target.getAttribute('data-id');
                 
                 if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
                     const url = `/pasien/${pasienId}`;
@@ -108,12 +104,19 @@
                         if (data.success) {
                             document.getElementById(`pasien-row-${pasienId}`).remove();
                             alert(data.success);
+                        } else {
+                            // Menangani error dari server jika ada
+                            alert(data.error || 'Gagal menghapus data.');
                         }
                     })
-                    .catch(error => console.error('Error deleting data:', error));
+                    .catch(error => {
+                        console.error('Error deleting data:', error);
+                        alert('Terjadi kesalahan saat menghapus data.');
+                    });
                 }
             }
         });
     });
-    </script>
+</script>
+
 </x-app-layout>
