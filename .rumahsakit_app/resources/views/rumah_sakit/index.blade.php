@@ -73,4 +73,51 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.delete-rs-btn');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const rsId = this.getAttribute('data-id');
+                
+                if (confirm('Apakah Anda yakin ingin menghapus data rumah sakit ini?')) {
+                    const url = `/rumah_sakit/${rsId}`; // URL untuk route destroy
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        // Cek jika response tidak ok (misal, error validasi 422)
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                throw new Error(errorData.error || 'Terjadi kesalahan.');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Hapus baris dari tabel di tampilan
+                            document.getElementById(`row-rs-${rsId}`).remove();
+                            alert(data.success); // Tampilkan pesan sukses
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Gagal menghapus: ' + error.message);
+                    });
+                }
+            });
+        });
+    });
+</script>
+
 </x-app-layout>
