@@ -45,6 +45,8 @@ class PasienController extends Controller
 
     public function update(Request $request, Pasien $pasien)
     {
+        $this->authorize('update', $pasien);
+
         $request->validate([
             'nama_pasien' => 'required|string|max:255',
             'alamat' => 'required|string',
@@ -59,6 +61,8 @@ class PasienController extends Controller
 
     public function destroy(Pasien $pasien)
     {
+        $this->authorize('delete', $pasien);
+        
         $pasien->delete();
         return response()->json(['success' => 'Data Pasien berhasil dihapus.']);
     }
